@@ -63,6 +63,9 @@ public class AutoScrollViewPager extends ViewPager {
     /** scroll factor for swipe scroll animation, default is 1.0 **/
     private double                 swipeScrollFactor           = 1.0;
 
+    /** first scroll delay time */
+    private long delayTimeInMills;
+
     private Handler                handler;
     private boolean                isAutoScroll                = false;
     private boolean                isStopByTouch               = false;
@@ -91,7 +94,7 @@ public class AutoScrollViewPager extends ViewPager {
      */
     public void startAutoScroll() {
         isAutoScroll = true;
-        sendScrollMessage((long)(interval + scroller.getDuration() / autoScrollFactor * swipeScrollFactor));
+        this.delayTimeInMills = (long)(interval + scroller.getDuration() / autoScrollFactor * swipeScrollFactor);
     }
 
     /**
@@ -101,15 +104,38 @@ public class AutoScrollViewPager extends ViewPager {
      */
     public void startAutoScroll(int delayTimeInMills) {
         isAutoScroll = true;
-        sendScrollMessage(delayTimeInMills);
+        this.delayTimeInMills = delayTimeInMills;
     }
+
+    /**
+     * start scroll when view attached
+     */
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        if(isAutoScroll){
+            sendScrollMessage(delayTimeInMills);
+        }
+    }
+
+    /**
+     * stop scroll when view detached
+     */
+    @Override
+    protected void onDetachedFromWindow() {
+        stopAutoScroll();
+        super.onDetachedFromWindow();
+    }
+
 
     /**
      * stop auto scroll
      */
     public void stopAutoScroll() {
-        isAutoScroll = false;
-        handler.removeMessages(SCROLL_WHAT);
+        if(isAutoScroll){
+            isAutoScroll = false;
+            handler.removeMessages(SCROLL_WHAT);
+        }
     }
 
     /**
