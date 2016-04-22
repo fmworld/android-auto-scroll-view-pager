@@ -123,7 +123,9 @@ public class AutoScrollViewPager extends ViewPager {
      */
     @Override
     protected void onDetachedFromWindow() {
-        stopAutoScroll();
+        if(isAutoScroll){
+            handler.removeMessages(SCROLL_WHAT);
+        }
         super.onDetachedFromWindow();
     }
 
